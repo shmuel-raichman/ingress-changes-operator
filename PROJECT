@@ -1,0 +1,7 @@
+domain: ingress.changes
+layout: go.kubebuilder.io/v2
+projectName: ingresses-changes
+repo: github.com/smuel1414/ingresses-changes
+version: 3-alpha
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}
