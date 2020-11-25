@@ -33,8 +33,8 @@ import (
 
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
+	// "io/ioutil"
+	// "net/http"
 
 	"github.com/smuel1414/ingresses-changes/utils"
 )
@@ -114,37 +114,38 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				payloadBuf := new(bytes.Buffer)
 				json.NewEncoder(payloadBuf).Encode(currentHostData)
 
+				utils.MakePostRequest(conf.IngressesHandlerAddress, payloadBuf)
 				// ***************************************
 				// url := "http://basic-http-server:8000"
-				url := conf.IngressesHandlerAddress
-				method := "POST"
+				// url := conf.IngressesHandlerAddress
+				// method := "POST"
 
-				// payload := strings.NewReader(`{ "host": host }`)
+				// // payload := strings.NewReader(`{ "host": host }`)
 
-				client := &http.Client{}
-				req, err := http.NewRequest(method, url, payloadBuf)
+				// client := &http.Client{}
+				// req, err := http.NewRequest(method, url, payloadBuf)
 
-				if err != nil {
-					// fmt.Println(err)
-					r.Log.Error(err, "error")
-					// return
-				}
-				req.Header.Add("Content-Type", "application/json")
+				// if err != nil {
+				// 	// fmt.Println(err)
+				// 	r.Log.Error(err, "error")
+				// 	// return
+				// }
+				// req.Header.Add("Content-Type", "application/json")
 
-				res, err := client.Do(req)
-				if err != nil {
-					// fmt.Println(err)x
-				}
-				defer res.Body.Close()
+				// res, err := client.Do(req)
+				// if err != nil {
+				// 	// fmt.Println(err)x
+				// }
+				// defer res.Body.Close()
 
-				body, err := ioutil.ReadAll(res.Body)
-				if err != nil {
-					// fmt.Println(err)
-					r.Log.Error(err, "error")
-					// return
-				}
-				//fmt.Println(string(body))
-				r.Log.Info(string(body))
+				// body, err := ioutil.ReadAll(res.Body)
+				// if err != nil {
+				// 	// fmt.Println(err)
+				// 	r.Log.Error(err, "error")
+				// 	// return
+				// }
+				// //fmt.Println(string(body))
+				// r.Log.Info(string(body))
 				// ***************************************
 
 			}

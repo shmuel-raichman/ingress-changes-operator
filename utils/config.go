@@ -6,21 +6,13 @@ package utils
 
 import (
 	"fmt"
-	// "github.com/smuel1414/ingresses-changes/structs"
+	"github.com/smuel1414/ingresses-changes/structs"
 	"os"
 	"strconv"
 )
 
-// Config is
-type Config struct {
-	Port                    int
-	Environment             string
-	IngressesHandlerAddress string
-	ExposeLabel             string
-}
-
 // ReadConfig is
-func ReadConfig() Config {
+func ReadConfig() structs.Config {
 
 	portString := os.Getenv("PORT")
 	if portString == "" {
@@ -48,7 +40,7 @@ func ReadConfig() Config {
 		panic(fmt.Sprintf("Could not parse %s to int", portString))
 	}
 
-	return Config{
+	return structs.Config{
 		Port:                    port,
 		Environment:             environment,
 		IngressesHandlerAddress: ingressesHandlerAddress,
