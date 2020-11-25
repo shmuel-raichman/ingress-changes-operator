@@ -35,6 +35,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"ingress-operator/utils"
 )
 
 // IngressReconciler reconciles a Ingress object
@@ -56,6 +58,8 @@ type IngressData struct {
 
 //Reconcile is
 func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+	conf := utils.ReadConfig()
+	// conf.Port
 	ctx := context.Background()
 	// log := r.Log.WithValues("ingress", req.NamespacedName)
 	// httpserver := "http://basic-http-server:8000"
@@ -91,7 +95,7 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	lables := ingress.ObjectMeta.Labels
 
 	for key, value := range lables {
-		if key == "expose.dns" && value == "true" {
+		if key == conf.ExposeLabel && value == "true" {
 			// expose.dns
 			r.Log.Info("\n\n\nThis ingress should ----   ---- be updated.")
 			r.Log.Info("\n", key, value)
@@ -111,7 +115,8 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				json.NewEncoder(payloadBuf).Encode(currentHostData)
 
 				// ***************************************
-				url := "http://basic-http-server:8000"
+				// url := "http://basic-http-server:8000"
+				url := conf.IngressesHandlerAddress
 				method := "POST"
 
 				// payload := strings.NewReader(`{ "host": host }`)

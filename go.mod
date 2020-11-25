@@ -2,6 +2,7 @@ module github.com/smuel1414/ingresses-changes
 
 go 1.13
 
+
 require (
 	github.com/go-logr/logr v0.1.0
 	github.com/onsi/ginkgo v1.12.1
@@ -11,3 +12,5 @@ require (
 	k8s.io/client-go v0.18.6
 	sigs.k8s.io/controller-runtime v0.6.2
 )
+
+// replace github.com/smuel1414/ingresses-changes/utils =>  ./utils
