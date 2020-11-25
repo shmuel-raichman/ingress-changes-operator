@@ -26,6 +26,7 @@ import (
 	"github.com/go-logr/logr"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -85,7 +86,11 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// ###########################################################################################################################
 	// ###########################################################################################################################
 
-	lables := ingress.ObjectMeta.Labels
+	// k8s.io/apimachinery/pkg/apis/meta/v1
+	// HasAnnotation(obj ObjectMeta, ann string)
+	// Annotations
+
+	annotations := ingress.ObjectMeta.Annotations
 	var hosts []string
 
 	// Append all host in cuurent ingress to slice.
@@ -93,29 +98,40 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		hosts = append(hosts, rule.Host)
 	}
 
+	var hasExposeAnnotation bool = metav1.HasAnnotation(ingress.ObjectMeta, "expose.dns")
 	// Check for if expose lable == true, if yes send post request to external ingreses handlar service.
-	for key, value := range lables {
-		if key == conf.ExposeLabel && value == "true" {
 
-			for _, host := range hosts {
-				log.Info("In progress", ingress.Name, "host should be exposed, sending to handler.")
-				log.Info("In progress", "host", host)
+	if hasExposeAnnotation {
 
-				currentHostData := IngressData{
-					Name:   ingress.Name,
-					Host:   host,
-					Expose: true,
+		for key, value := range annotations {
+			if key == conf.ExposeLabel && value == "true" {
+
+				for _, host := range hosts {
+					log.Info("In progress", ingress.Name, "host should be exposed, sending to handler.")
+					log.V(1).Info("In progress", "host", host)
+					log.V(1).Info("In progress", "expose annotation here: ", hasExposeAnnotation)
+
+					currentHostData := IngressData{
+						Name:   ingress.Name,
+						Host:   host,
+						Expose: true,
+					}
+
+					payloadBuf := new(bytes.Buffer)
+					json.NewEncoder(payloadBuf).Encode(currentHostData)
+
+					utils.MakePostRequest(conf.IngressesHandlerAddress, payloadBuf)
+
 				}
 
-				payloadBuf := new(bytes.Buffer)
-				json.NewEncoder(payloadBuf).Encode(currentHostData)
-
-				utils.MakePostRequest(conf.IngressesHandlerAddress, payloadBuf)
-
+				return ctrl.Result{}, nil
+			} else {
+				log.V(1).Info("In progress", "expose annotation value: ", hasExposeAnnotation)
 			}
-
-			return ctrl.Result{}, nil
 		}
+
+	} else {
+		log.V(1).Info("In progress", "There is no expose annotation here: ", hasExposeAnnotation)
 	}
 
 	// ###########################################################################################################################

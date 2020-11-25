@@ -4,8 +4,8 @@ package structs
 
 // Config is
 type Config struct {
-	Port int
-	Environment string
+	Port                    int
+	Environment             string
 	IngressesHandlerAddress string
-	ExposeLabel string
-  }
+	ExposeLabel             string
+}
