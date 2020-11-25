@@ -26,17 +26,15 @@ import (
 	"github.com/go-logr/logr"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"bytes"
 	"encoding/json"
-	// "io/ioutil"
-	// "net/http"
-
 	"github.com/smuel1414/ingresses-changes/utils"
+
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // IngressReconciler reconciles a Ingress object
@@ -56,13 +54,14 @@ type IngressData struct {
 // +kubebuilder:rbac:groups=extensions,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=extensions,resources=ingresses/status,verbs=get;update;patch
 
+var log = logf.Log.WithName("controllers.Ingress")
+
 //Reconcile is
 func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+
 	conf := utils.ReadConfig()
-	// conf.Port
 	ctx := context.Background()
-	// log := r.Log.WithValues("ingress", req.NamespacedName)
-	// httpserver := "http://basic-http-server:8000"
+
 	// your logic here
 	// ###########################################################################################################################
 	// Lookup the instance for this reconcile request
@@ -74,11 +73,11 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			r.Log.Info("Ingress resource not found. Ignoring since object must be deleted")
+			log.Info("Ingress resource not found. Ignoring since object must be deleted")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		r.Log.Error(err, "Failed to get ingress")
+		log.Error(err, "Failed to get ingress")
 		return ctrl.Result{}, err
 	}
 
@@ -86,24 +85,21 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// ###########################################################################################################################
 	// ###########################################################################################################################
 
+	lables := ingress.ObjectMeta.Labels
 	var hosts []string
 
+	// Append all host in cuurent ingress to slice.
 	for _, rule := range ingress.Spec.Rules {
 		hosts = append(hosts, rule.Host)
 	}
 
-	lables := ingress.ObjectMeta.Labels
-
+	// Check for if expose lable == true, if yes send post request to external ingreses handlar service.
 	for key, value := range lables {
 		if key == conf.ExposeLabel && value == "true" {
-			// expose.dns
-			r.Log.Info("\n\n\nThis ingress should ----   ---- be updated.")
-			r.Log.Info("\n", key, value)
-
-			// r.Log.Info("\n", ingress.Spec)
 
 			for _, host := range hosts {
-				r.Log.Info("\n", "host: ", host)
+				log.Info("In progress", ingress.Name, "host should be exposed, sending to handler.")
+				log.Info("In progress", "host", host)
 
 				currentHostData := IngressData{
 					Name:   ingress.Name,
@@ -115,38 +111,6 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 				json.NewEncoder(payloadBuf).Encode(currentHostData)
 
 				utils.MakePostRequest(conf.IngressesHandlerAddress, payloadBuf)
-				// ***************************************
-				// url := "http://basic-http-server:8000"
-				// url := conf.IngressesHandlerAddress
-				// method := "POST"
-
-				// // payload := strings.NewReader(`{ "host": host }`)
-
-				// client := &http.Client{}
-				// req, err := http.NewRequest(method, url, payloadBuf)
-
-				// if err != nil {
-				// 	// fmt.Println(err)
-				// 	r.Log.Error(err, "error")
-				// 	// return
-				// }
-				// req.Header.Add("Content-Type", "application/json")
-
-				// res, err := client.Do(req)
-				// if err != nil {
-				// 	// fmt.Println(err)x
-				// }
-				// defer res.Body.Close()
-
-				// body, err := ioutil.ReadAll(res.Body)
-				// if err != nil {
-				// 	// fmt.Println(err)
-				// 	r.Log.Error(err, "error")
-				// 	// return
-				// }
-				// //fmt.Println(string(body))
-				// r.Log.Info(string(body))
-				// ***************************************
 
 			}
 
