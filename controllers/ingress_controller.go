@@ -12,24 +12,24 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+https://github.com/operator-framework/operator-sdk/blob/master/testdata/go/memcached-operator/controllers/memcached_controller.go
+https://sdk.operatorframework.io/docs/building-operators/golang/tutorial/#generating-crd-manifests
+https://github.com/jaegertracing/jaeger-operator/blob/master/pkg/ingress/ingress.go
+
 */
 
 package controllers
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	// "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	// networkingv1beta1 "k8s.io/api/networking/v1beta1"
-	// "fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // IngressReconciler reconciles a Ingress object
@@ -49,7 +49,7 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	// your logic here
 	// ###########################################################################################################################
-	// Lookup the Memcached instance for this reconcile request
+	// Lookup the instance for this reconcile request
 	ingress := &extensionsv1beta1.Ingress{}
 	err := r.Get(ctx, req.NamespacedName, ingress)
 
@@ -66,96 +66,17 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 
-	// Check if the deployment already exists, if not create a new one
-	// found := &appsv1.Deployment{}
-	// err = r.Get(ctx, types.NamespacedName{Name: ingress.Name, Namespace: ingress.Namespace}, ingress)
-	// if err != nil && errors.IsNotFound(err) {
-	// 	// Define a new deployment
-	// 	// dep := r.deploymentForMemcached(ingress)
-	// 	// log.Info("Log ingress round", "ingress.Namespace", ingress.Namespace, "ingress.Name", ingress.Name)
-	// 	// err = r.Create(ctx, dep)
-	// 	// if err != nil {
-	// 	// 	log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
-	// 	// 	return ctrl.Result{}, err
-	// 	// }
-	// 	// Deployment created successfully - return and requeue
-	// 	return ctrl.Result{Requeue: false}, nil
-	// } else if err != nil {
-	// 	log.Error(err, "Failed to get ingress")
-	// 	return ctrl.Result{}, err
-	// }
-
-	// Ensure the deployment size is the same as the spec
-	currentIngress := extensionsv1beta1.Ingress{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Ingress",
-			APIVersion: "extensions/v1beta1",
-		},
-		ObjectMeta: ingress.ObjectMeta,
-	}
-
 	// ###########################################################################################################################
 	// ###########################################################################################################################
 	// ###########################################################################################################################
 
-	// if ingress.Spec.Backend != nil {
-	// 	currentIngress.Spec = netv1beta.IngressSpec{
-	// 		Backend: &netv1beta.IngressBackend{
-	// 			ServiceName: ingress.Spec.Backend.ServiceName,
-	// 			ServicePort: ingress.Spec.Backend.ServicePort,
-	// 		},
-	// 	}
-	// }
-
-	// for _, tls := range ingress.Spec.TLS {
-	// 	currentIngress.Spec.TLS = append(currentIngress.Spec.TLS, netv1beta.IngressTLS{
-	// 		Hosts:      tls.Hosts,
-	// 		SecretName: tls.SecretName,
-	// 	})
-	// }
 	var hosts []string
 
 	for _, rule := range ingress.Spec.Rules {
-		// httpIngressPaths := make([]netv1beta.HTTPIngressPath, len(rule.HTTP.Paths))
-		// for i, path := range rule.HTTP.Paths {
-		// 	httpIngressPaths[i].Backend.ServicePort = path.Backend.ServicePort
-		// 	httpIngressPaths[i].Backend.ServiceName = path.Backend.ServiceName
-		// 	httpIngressPaths[i].Path = path.Path
-
-		// }
-		// hosts := make([]string, len(ingress.Spec.Rules))
-		// var hosts []string
 		hosts = append(hosts, rule.Host)
-		// currentIngress.Spec.Rules = append(currentIngress.Spec.Rules, netv1beta.IngressRule{
-		// hosts[i]
-		// 	Host: rule.Host,
-		// 	IngressRuleValue: netv1beta.IngressRuleValue{
-		// 		HTTP: &netv1beta.HTTPIngressRuleValue{
-		// 			Paths: httpIngressPaths,
-		// 		},
-		// 	},
 	}
 
-	// ###########################################################################################################################
-	// ###########################################################################################################################
-	// ###########################################################################################################################
-
-	lables := currentIngress.ObjectMeta.Labels
-	// metaData := ingress
-	// log = r.Log.WithValues("Lables", oldIngress.ObjectMeta.Labels)
-	// log.Info("Ingress metadata ", ":", oldIngress.ObjectMeta.Labels)
-	// fmt.Printf("%+v", oldIngress.ObjectMeta)
-
-	// if lables.exposed.dns != nil && errors.IsNotFound(err) {
-
-	// r.Log.Info("\n\n\nLet's try just print")
-	// r.Log.Info("\n\n\n", "Lables", labels)
-
-	// for _, f := range AddToManagerFuncs {
-	// 	if err := f(m); err != nil {
-	// 		return err
-	// 	}
-	// }
+	lables := ingress.ObjectMeta.Labels
 
 	for key, value := range lables {
 		if key == "expose.dns" && value == "true" {
@@ -173,8 +94,9 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 
-	// #######################################################################################################################################################
-
+	// ###########################################################################################################################
+	// ###########################################################################################################################
+	// ###########################################################################################################################
 	return ctrl.Result{}, nil
 }
 
