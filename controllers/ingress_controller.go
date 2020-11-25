@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"k8s.io/apimachinery/pkg/types"
+	// "k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	// networkingv1beta1 "k8s.io/api/networking/v1beta1"
 	// "fmt"
@@ -45,7 +45,7 @@ type IngressReconciler struct {
 //Reconcile is
 func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
-	log := r.Log.WithValues("ingress", req.NamespacedName)
+	// log := r.Log.WithValues("ingress", req.NamespacedName)
 
 	// your logic here
 	// ###########################################################################################################################
@@ -58,84 +58,120 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			log.Info("Ingress resource not found. Ignoring since object must be deleted")
+			r.Log.Info("Ingress resource not found. Ignoring since object must be deleted")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		log.Error(err, "Failed to get ingress")
+		r.Log.Error(err, "Failed to get ingress")
 		return ctrl.Result{}, err
 	}
 
 	// Check if the deployment already exists, if not create a new one
 	// found := &appsv1.Deployment{}
-	err = r.Get(ctx, types.NamespacedName{Name: ingress.Name, Namespace: ingress.Namespace}, ingress)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new deployment
-		// dep := r.deploymentForMemcached(ingress)
-		// log.Info("Log ingress round", "ingress.Namespace", ingress.Namespace, "ingress.Name", ingress.Name)
-		// err = r.Create(ctx, dep)
-		// if err != nil {
-		// 	log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
-		// 	return ctrl.Result{}, err
-		// }
-		// Deployment created successfully - return and requeue
-		return ctrl.Result{Requeue: false}, nil
-	} else if err != nil {
-		log.Error(err, "Failed to get ingress")
-		return ctrl.Result{}, err
-	}
+	// err = r.Get(ctx, types.NamespacedName{Name: ingress.Name, Namespace: ingress.Namespace}, ingress)
+	// if err != nil && errors.IsNotFound(err) {
+	// 	// Define a new deployment
+	// 	// dep := r.deploymentForMemcached(ingress)
+	// 	// log.Info("Log ingress round", "ingress.Namespace", ingress.Namespace, "ingress.Name", ingress.Name)
+	// 	// err = r.Create(ctx, dep)
+	// 	// if err != nil {
+	// 	// 	log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+	// 	// 	return ctrl.Result{}, err
+	// 	// }
+	// 	// Deployment created successfully - return and requeue
+	// 	return ctrl.Result{Requeue: false}, nil
+	// } else if err != nil {
+	// 	log.Error(err, "Failed to get ingress")
+	// 	return ctrl.Result{}, err
+	// }
 
 	// Ensure the deployment size is the same as the spec
-	oldIngress := extensionsv1beta1.Ingress{
+	currentIngress := extensionsv1beta1.Ingress{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Ingress",
 			APIVersion: "extensions/v1beta1",
 		},
 		ObjectMeta: ingress.ObjectMeta,
 	}
+
+	// ###########################################################################################################################
+	// ###########################################################################################################################
+	// ###########################################################################################################################
+
+	// if ingress.Spec.Backend != nil {
+	// 	currentIngress.Spec = netv1beta.IngressSpec{
+	// 		Backend: &netv1beta.IngressBackend{
+	// 			ServiceName: ingress.Spec.Backend.ServiceName,
+	// 			ServicePort: ingress.Spec.Backend.ServicePort,
+	// 		},
+	// 	}
+	// }
+
+	// for _, tls := range ingress.Spec.TLS {
+	// 	currentIngress.Spec.TLS = append(currentIngress.Spec.TLS, netv1beta.IngressTLS{
+	// 		Hosts:      tls.Hosts,
+	// 		SecretName: tls.SecretName,
+	// 	})
+	// }
+	var hosts []string
+
+	for _, rule := range ingress.Spec.Rules {
+		// httpIngressPaths := make([]netv1beta.HTTPIngressPath, len(rule.HTTP.Paths))
+		// for i, path := range rule.HTTP.Paths {
+		// 	httpIngressPaths[i].Backend.ServicePort = path.Backend.ServicePort
+		// 	httpIngressPaths[i].Backend.ServiceName = path.Backend.ServiceName
+		// 	httpIngressPaths[i].Path = path.Path
+
+		// }
+		// hosts := make([]string, len(ingress.Spec.Rules))
+		// var hosts []string
+		hosts = append(hosts, rule.Host)
+		// currentIngress.Spec.Rules = append(currentIngress.Spec.Rules, netv1beta.IngressRule{
+		// hosts[i]
+		// 	Host: rule.Host,
+		// 	IngressRuleValue: netv1beta.IngressRuleValue{
+		// 		HTTP: &netv1beta.HTTPIngressRuleValue{
+		// 			Paths: httpIngressPaths,
+		// 		},
+		// 	},
+	}
+
+	// ###########################################################################################################################
+	// ###########################################################################################################################
+	// ###########################################################################################################################
+
+	lables := currentIngress.ObjectMeta.Labels
 	// metaData := ingress
 	// log = r.Log.WithValues("Lables", oldIngress.ObjectMeta.Labels)
 	// log.Info("Ingress metadata ", ":", oldIngress.ObjectMeta.Labels)
 	// fmt.Printf("%+v", oldIngress.ObjectMeta)
 
-	r.Log.Info("\n\n\nLet's try just print")
-	r.Log.Info("\n\n\n", "Lables", oldIngress.ObjectMeta.Labels)
+	// if lables.exposed.dns != nil && errors.IsNotFound(err) {
 
-	// Ensure the deployment size is the same as the spec
-	// size := memcached.Spec.Size
-	// if *found.Spec.Replicas != size {
-	// 	found.Spec.Replicas = &size
-	// 	err = r.Update(ctx, found)
-	// 	if err != nil {
-	// 		log.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
-	// 		return ctrl.Result{}, err
-	// 	}
-	// 	// Spec updated - return and requeue
-	// 	return ctrl.Result{Requeue: true}, nil
-	// }
+	// r.Log.Info("\n\n\nLet's try just print")
+	// r.Log.Info("\n\n\n", "Lables", labels)
 
-	// Update the Memcached status with the pod names
-	// List the pods for this memcached's deployment
-	// podList := &corev1.PodList{}
-	// listOpts := []client.ListOption{
-	// 	client.InNamespace(memcached.Namespace),
-	// 	client.MatchingLabels(labelsForMemcached(memcached.Name)),
-	// }
-	// if err = r.List(ctx, podList, listOpts...); err != nil {
-	// 	log.Error(err, "Failed to list pods", "Memcached.Namespace", memcached.Namespace, "Memcached.Name", memcached.Name)
-	// 	return ctrl.Result{}, err
-	// }
-	// podNames := getPodNames(podList.Items)
-
-	// // Update status.Nodes if needed
-	// if !reflect.DeepEqual(podNames, memcached.Status.Nodes) {
-	// 	memcached.Status.Nodes = podNames
-	// 	err := r.Status().Update(ctx, memcached)
-	// 	if err != nil {
-	// 		log.Error(err, "Failed to update Memcached status")
-	// 		return ctrl.Result{}, err
+	// for _, f := range AddToManagerFuncs {
+	// 	if err := f(m); err != nil {
+	// 		return err
 	// 	}
 	// }
+
+	for key, value := range lables {
+		if key == "expose.dns" && value == "true" {
+			// expose.dns
+			r.Log.Info("\n\n\nThis ingress should ----   ---- be updated.")
+			r.Log.Info("\n", key, value)
+
+			// r.Log.Info("\n", ingress.Spec)
+
+			for _, host := range hosts {
+				r.Log.Info("\n", "host: ", host)
+			}
+
+			return ctrl.Result{}, nil
+		}
+	}
 
 	// #######################################################################################################################################################
 
