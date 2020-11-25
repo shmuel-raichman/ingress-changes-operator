@@ -30,6 +30,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
 )
 
 // IngressReconciler reconciles a Ingress object
@@ -39,6 +44,13 @@ type IngressReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+// IngressData is
+type IngressData struct {
+	Name   string `json:"name"`
+	Host   string `json:"host"`
+	Expose bool   `json:"expose"`
+}
+
 // +kubebuilder:rbac:groups=extensions,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=extensions,resources=ingresses/status,verbs=get;update;patch
 
@@ -46,7 +58,7 @@ type IngressReconciler struct {
 func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	// log := r.Log.WithValues("ingress", req.NamespacedName)
-
+	// httpserver := "http://basic-http-server:8000"
 	// your logic here
 	// ###########################################################################################################################
 	// Lookup the instance for this reconcile request
@@ -88,6 +100,48 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 			for _, host := range hosts {
 				r.Log.Info("\n", "host: ", host)
+
+				currentHostData := IngressData{
+					Name:   ingress.Name,
+					Host:   host,
+					Expose: true,
+				}
+
+				payloadBuf := new(bytes.Buffer)
+				json.NewEncoder(payloadBuf).Encode(currentHostData)
+
+				// ***************************************
+				url := "http://basic-http-server:8000"
+				method := "POST"
+
+				// payload := strings.NewReader(`{ "host": host }`)
+
+				client := &http.Client{}
+				req, err := http.NewRequest(method, url, payloadBuf)
+
+				if err != nil {
+					// fmt.Println(err)
+					r.Log.Error(err, "error")
+					// return
+				}
+				req.Header.Add("Content-Type", "application/json")
+
+				res, err := client.Do(req)
+				if err != nil {
+					// fmt.Println(err)x
+				}
+				defer res.Body.Close()
+
+				body, err := ioutil.ReadAll(res.Body)
+				if err != nil {
+					// fmt.Println(err)
+					r.Log.Error(err, "error")
+					// return
+				}
+				//fmt.Println(string(body))
+				r.Log.Info(string(body))
+				// ***************************************
+
 			}
 
 			return ctrl.Result{}, nil
