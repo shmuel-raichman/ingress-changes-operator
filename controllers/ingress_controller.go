@@ -36,7 +36,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"ingress-operator/utils"
+	"github.com/smuel1414/ingresses-changes/utils"
 )
 
 // IngressReconciler reconciles a Ingress object
