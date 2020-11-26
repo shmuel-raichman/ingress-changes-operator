@@ -6,8 +6,6 @@ package utils
 // https://sdk.operatorframework.io/docs/building-operators/golang/references/event-filtering/
 
 import (
-	// logf "sigs.k8s.io/controller-runtime/pkg/log"
-
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -19,7 +17,7 @@ func UsePredicate() predicate.Predicate {
 
 	isAnnotatedIngress := predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			log.V(1).Info("Update Function ")
+			log.V(1).Info("predicate", "function", "Update")
 			_, ok := e.ObjectNew.(*extensionsv1beta1.Ingress)
 
 			if !ok {
@@ -28,7 +26,7 @@ func UsePredicate() predicate.Predicate {
 
 			expose, _ := e.MetaNew.GetAnnotations()[conf.ExposeAnnotation]
 			doExpose := expose == "true"
-			log.V(1).Info("Update Function", "expose", expose)
+			log.V(1).Info("predicate", "function", "Update", "expose", expose)
 
 			return doExpose
 			// oldIngress, ok := e.ObjectOld.(*extensionsv1beta1.Ingress)
@@ -65,7 +63,7 @@ func UsePredicate() predicate.Predicate {
 			// return new
 		},
 		CreateFunc: func(e event.CreateEvent) bool {
-			log.V(1).Info("Create Function ")
+			log.V(1).Info("predicate", "function", "Create")
 			_, ok := e.Object.(*extensionsv1beta1.Ingress)
 
 			if !ok {
@@ -74,12 +72,12 @@ func UsePredicate() predicate.Predicate {
 
 			expose, _ := e.Meta.GetAnnotations()[conf.ExposeAnnotation]
 			doExpose := expose == "true"
-			log.V(1).Info("Create Function", "expose", expose)
+			log.V(1).Info("predicate", "function", "Create", "expose", expose)
 
 			return doExpose
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			log.V(1).Info("Delete Function ")
+			log.V(1).Info("predicate", "function", "Delete  ")
 			_, ok := e.Object.(*extensionsv1beta1.Ingress)
 
 			if !ok {
@@ -88,12 +86,12 @@ func UsePredicate() predicate.Predicate {
 
 			expose, _ := e.Meta.GetAnnotations()[conf.ExposeAnnotation]
 			doExpose := expose == "true"
-			log.V(1).Info("Delete Function", "expose", expose)
+			log.V(1).Info("predicate", "function", "Delete", "expose", expose)
 
 			return doExpose
 		},
 		GenericFunc: func(e event.GenericEvent) bool {
-			log.V(1).Info("Generic Function ")
+			log.V(1).Info("predicate", "function", "Generic")
 			_, ok := e.Object.(*extensionsv1beta1.Ingress)
 
 			if !ok {
@@ -102,7 +100,7 @@ func UsePredicate() predicate.Predicate {
 
 			expose, _ := e.Meta.GetAnnotations()[conf.ExposeAnnotation]
 			doExpose := expose == "true"
-			log.V(1).Info("Generic Function", "expose", expose)
+			log.V(1).Info("predicate", "function", "Generic", "expose", expose)
 
 			return doExpose
 		},

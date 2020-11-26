@@ -26,13 +26,13 @@ import (
 	"github.com/go-logr/logr"
 	extensionsv1beta1 "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"bytes"
 	"encoding/json"
+	"github.com/smuel1414/ingresses-changes/structs"
 	"github.com/smuel1414/ingresses-changes/utils"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -43,13 +43,6 @@ type IngressReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
-}
-
-// IngressData is
-type IngressData struct {
-	Name   string `json:"name"`
-	Host   string `json:"host"`
-	Expose bool   `json:"expose"`
 }
 
 // +kubebuilder:rbac:groups=extensions,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
@@ -85,13 +78,10 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// ###########################################################################################################################
 	// ###########################################################################################################################
 	// ###########################################################################################################################
-
-	var hosts []string
-
 	for _, rule := range ingress.Spec.Rules {
-		host = rule.Host)
+		host := rule.Host
 
-		currentHostData := IngressData{
+		currentHostData := structs.IngressData{
 			Name:   ingress.Name,
 			Host:   host,
 			Expose: true,
@@ -103,8 +93,6 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		utils.MakePostRequest(conf.IngressesHandlerAddress, payloadBuf)
 
 	}
-
-
 	// ###########################################################################################################################
 	// ###########################################################################################################################
 	// ###########################################################################################################################
