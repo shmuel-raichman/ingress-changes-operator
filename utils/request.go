@@ -8,8 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	// logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // Set a global logger for the memcached request. Each log record produced
@@ -17,7 +16,7 @@ import (
 // These names are hierarchical; the name attached to request log statements
 // will be "operator-sdk.request" because SDKLog has name
 // "operator-sdk".
-var log = logf.Log.WithName("utils.request")
+// var log = logf.Log.WithName("utils.request")
 
 // MakePostRequest is
 func MakePostRequest(url string, payloadBuf io.Reader) {

@@ -115,7 +115,7 @@ spec:
         - --enable-leader-election
         command:
         - /manager
-        image: smuel770/golang-operator-sdk:vbeta-1.0.7
+        image: smuel770/golang-operator-sdk:vbeta-1.0.15
         name: manager
         resources:
           limits:

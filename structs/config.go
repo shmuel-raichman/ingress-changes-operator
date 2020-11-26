@@ -7,5 +7,5 @@ type Config struct {
 	Port                    int
 	Environment             string
 	IngressesHandlerAddress string
-	ExposeLabel             string
+	ExposeAnnotation        string
 }

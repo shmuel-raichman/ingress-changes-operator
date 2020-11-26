@@ -29,9 +29,9 @@ func ReadConfig() structs.Config {
 		ingressesHandlerAddress = "http://basic-http-server:8000"
 	}
 
-	exposeLabel := os.Getenv("EXPOSE_LABEL")
-	if exposeLabel == "" {
-		exposeLabel = "expose.dns"
+	exposeAnnotation := os.Getenv("EXPOSE_ANNOTATION")
+	if exposeAnnotation == "" {
+		exposeAnnotation = "expose.dns"
 	}
 
 	port, err := strconv.Atoi(portString)
@@ -44,6 +44,6 @@ func ReadConfig() structs.Config {
 		Port:                    port,
 		Environment:             environment,
 		IngressesHandlerAddress: ingressesHandlerAddress,
-		ExposeLabel:             exposeLabel,
+		ExposeAnnotation:        exposeAnnotation,
 	}
 }
