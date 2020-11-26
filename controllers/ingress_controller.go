@@ -86,53 +86,24 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	// ###########################################################################################################################
 	// ###########################################################################################################################
 
-	// k8s.io/apimachinery/pkg/apis/meta/v1
-	// HasAnnotation(obj ObjectMeta, ann string)
-	// Annotations
-
-	annotations := ingress.ObjectMeta.Annotations
 	var hosts []string
 
-	// Append all host in cuurent ingress to slice.
 	for _, rule := range ingress.Spec.Rules {
-		hosts = append(hosts, rule.Host)
-	}
+		host = rule.Host)
 
-	var hasExposeAnnotation bool = metav1.HasAnnotation(ingress.ObjectMeta, conf.ExposeAnnotation)
-	// Check for if expose lable == true, if yes send post request to external ingreses handlar service.
-
-	if hasExposeAnnotation {
-
-		for key, value := range annotations {
-			if key == conf.ExposeAnnotation && value == "true" {
-
-				for _, host := range hosts {
-					log.Info("In progress", ingress.Name, "host should be exposed, sending to handler.")
-					log.V(1).Info("In progress", "host", host)
-					log.V(1).Info("In progress", "expose annotation here: ", hasExposeAnnotation)
-
-					currentHostData := IngressData{
-						Name:   ingress.Name,
-						Host:   host,
-						Expose: true,
-					}
-
-					payloadBuf := new(bytes.Buffer)
-					json.NewEncoder(payloadBuf).Encode(currentHostData)
-
-					utils.MakePostRequest(conf.IngressesHandlerAddress, payloadBuf)
-
-				}
-
-				return ctrl.Result{}, nil
-			} else {
-				log.V(1).Info("In progress", "expose annotation value: ", hasExposeAnnotation)
-			}
+		currentHostData := IngressData{
+			Name:   ingress.Name,
+			Host:   host,
+			Expose: true,
 		}
 
-	} else {
-		log.V(1).Info("In progress", "There is no expose annotation here: ", hasExposeAnnotation)
+		payloadBuf := new(bytes.Buffer)
+		json.NewEncoder(payloadBuf).Encode(currentHostData)
+
+		utils.MakePostRequest(conf.IngressesHandlerAddress, payloadBuf)
+
 	}
+
 
 	// ###########################################################################################################################
 	// ###########################################################################################################################
@@ -141,69 +112,6 @@ func (r *IngressReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 }
 
 // https://sdk.operatorframework.io/docs/building-operators/golang/references/event-filtering/
-// func usePredicate() predicate.Predicate {
-// 	return predicate.Funcs{
-// 		UpdateFunc: func(e event.UpdateEvent) bool {
-// 			// Ignore updates to CR status in which case metadata.Generation does not change
-// 			return e.MetaOld.GetGeneration() != e.MetaNew.GetGeneration()
-// 		},
-// 		DeleteFunc: func(e event.DeleteEvent) bool {
-// 			// Evaluates to false if the object has been confirmed deleted.
-// 			return !e.DeleteStateUnknown
-// 		},
-// 	}
-// }
-
-// func usePredicate() predicate.Predicate {
-// 	isAnnotatedIngress := predicate.Funcs{
-// 		UpdateFunc: func(e event.UpdateEvent) bool {
-// 			oldIngress, ok := e.ObjectOld.(*extensionsv1beta1.Ingress)
-// 			log.V(1).Info("In progress", "is old ingress exist: ", ok)
-// 			if !ok {
-// 				return false
-// 			}
-// 			newIngress, ok := e.ObjectNew.(*extensionsv1beta1.Ingress)
-// 			log.V(1).Info("In progress", "is new ingress exist: ", ok)
-// 			if !ok {
-// 				return false
-// 			}
-// 			// if newIngress.Type != util.TLSSecret {
-// 			//     return false
-// 			// }
-// 			log.V(1).Info("In progress", "oldIngress: ", oldIngress)
-// 			log.V(1).Info("In progress", "newIngress: ", newIngress)
-// 			oldValue, _ := e.MetaOld.GetAnnotations()["expose.dns"]
-// 			newValue, _ := e.MetaNew.GetAnnotations()["expose.dns"]
-// 			// old := oldValue == "true"
-// 			new := newValue == "true"
-
-// 			log.V(1).Info("In progress", "oldValue: ", oldValue)
-// 			log.V(1).Info("In progress", "newValue: ", newValue)
-
-// 			log.V(1).Info("In progress", "e.MetaOld.GetAnnotations(): ", e.MetaOld.GetAnnotations())
-// 			log.V(1).Info("In progress", "e.MetaNew.GetAnnotations(): ", e.MetaNew.GetAnnotations())
-// 			// if the content has changed we trigger if the annotation is there
-// 			// if !reflect.DeepEqual(newIngress, oldIngress) {
-// 			// 	log.V(1).Info("In progress", "!reflect.DeepEqual(newIngress, oldIngress): ", !reflect.DeepEqual(newIngress, oldIngress))
-// 			// 	return true
-// 			// }
-// 			// otherwise we trigger if the annotation has changed
-// 			return new
-// 		}, //,
-// 		// CreateFunc: func(e event.CreateEvent) bool {
-// 		//     Ingress, ok := e.Object.(*extensionsv1beta1.Ingress)
-// 		//     if !ok {
-// 		//         return false
-// 		//     }
-// 		//     if Ingress.Type != util.TLSSecret {
-// 		//         return false
-// 		//     }
-// 		//     value, _ := e.Meta.GetAnnotations()[certInfoAnnotation]
-// 		//     return value == "true"
-// 		// },
-// 	}
-// 	return isAnnotatedIngress
-// }
 
 //SetupWithManager is
 func (r *IngressReconciler) SetupWithManager(mgr ctrl.Manager) error {

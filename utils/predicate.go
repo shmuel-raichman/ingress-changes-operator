@@ -3,6 +3,7 @@
 package utils
 
 // credit https://blog.risingstack.com/golang-tutorial-for-nodejs-developers-getting-started/#nethttp
+// https://sdk.operatorframework.io/docs/building-operators/golang/references/event-filtering/
 
 import (
 	// logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -62,7 +63,7 @@ func UsePredicate() predicate.Predicate {
 			// }
 			// otherwise we trigger if the annotation has changed
 			// return new
-		}, //,
+		},
 		CreateFunc: func(e event.CreateEvent) bool {
 			log.V(1).Info("Create Function ")
 			_, ok := e.Object.(*extensionsv1beta1.Ingress)
