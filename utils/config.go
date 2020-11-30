@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-// ReadConfig is
+// ReadConfig getting series of environments variables to golang struct and checking if env variables is empty giving value.
 func ReadConfig() structs.Config {
 
 	portString := os.Getenv("PORT")
@@ -34,8 +34,8 @@ func ReadConfig() structs.Config {
 		exposeAnnotation = "expose.dns"
 	}
 
+	// Convert PORT envinroment variable to int.
 	port, err := strconv.Atoi(portString)
-
 	if err != nil {
 		panic(fmt.Sprintf("Could not parse %s to int", portString))
 	}

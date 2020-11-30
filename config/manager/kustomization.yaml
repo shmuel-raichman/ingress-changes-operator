@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: smuel770/golang-operator-sdk
-  newTag: vbeta-1.0.16
+  newTag: vbeta-1.1.0

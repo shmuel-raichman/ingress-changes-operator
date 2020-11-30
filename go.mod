@@ -12,5 +12,3 @@ require (
 	k8s.io/client-go v0.18.6
 	sigs.k8s.io/controller-runtime v0.6.2
 )
-
-// replace github.com/smuel1414/ingresses-changes/utils =>  ./utils

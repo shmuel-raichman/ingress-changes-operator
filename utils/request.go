@@ -8,10 +8,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	// logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// MakePostRequest is
+// MakePostRequest send post request to given url with given payload and log the body results Or errors to console (operator console not default "log" package).
 func MakePostRequest(url string, payloadBuf io.Reader) {
 
 	method := "POST"
