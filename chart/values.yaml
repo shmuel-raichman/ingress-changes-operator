@@ -1,0 +1,15 @@
+# Default values for ingress-operator-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# smuel770/golang-operator-sdk:vbeta-1.0.2
+image:
+  repository: smuel770/golang-operator-sdk
+  tag: latest
+  pullPolicy: IfNotPresent
+
+
+env:
+  environment: "int"
+  ingressHandlerAddress: "http://basic-http-server.lab:8000"
+  exposeLabel: "expose.dns"
